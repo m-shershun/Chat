@@ -59,7 +59,12 @@ struct UIList<MessageContent: View, InputView: View>: UIViewRepresentable {
         tableView.showsVerticalScrollIndicator = false
         tableView.estimatedSectionHeaderHeight = 1
         tableView.estimatedSectionFooterHeight = UITableView.automaticDimension
-        tableView.backgroundColor = UIColor(theme.colors.mainBG)
+        if let image = UIImage(named: "bc_messanger") {
+            let backgroundImageView = UIImageView(image: image)
+            backgroundImageView.contentMode = .scaleAspectFill
+            tableView.backgroundColor = .clear
+            tableView.backgroundView = backgroundImageView
+        }
         tableView.scrollsToTop = false
         tableView.isScrollEnabled = isScrollEnabled
 
@@ -494,7 +499,7 @@ struct UIList<MessageContent: View, InputView: View>: UIViewRepresentable {
                 sectionHeaderViewBuilder(section)
                     .rotationEffect(Angle(degrees: (type == .conversation ? 180 : 0)))
             ).view
-            header?.backgroundColor = UIColor(mainBackgroundColor)
+            header?.backgroundColor = .clear
             return header
         }
         

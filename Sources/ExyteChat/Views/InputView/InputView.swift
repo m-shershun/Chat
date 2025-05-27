@@ -153,9 +153,9 @@ struct InputView: View {
                 if isMediaAvailable() {
                     attachButton
                 }
-                if isGiphyAvailable() {
-                    giphyButton
-                }
+//                if isGiphyAvailable() {
+//                    giphyButton
+//                }
             case .signature:
                 if viewModel.mediaPickerMode == .cameraSelection {
                     addButton

@@ -565,7 +565,7 @@ struct UIList<MessageContent: View, InputView: View>: UIViewRepresentable {
 
             let tableViewCell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
             tableViewCell.selectionStyle = .none
-            tableViewCell.backgroundColor = UIColor(mainBackgroundColor)
+            tableViewCell.backgroundColor = .clear
 
             let row = sections[indexPath.section].rows[indexPath.row]
             tableViewCell.contentConfiguration = UIHostingConfiguration {

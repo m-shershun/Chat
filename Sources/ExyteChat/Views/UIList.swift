@@ -1,6 +1,6 @@
 //
 //  UIList.swift
-//  
+//
 //
 //  Created by Alisa Mylnikova on 24.02.2023.
 //
@@ -59,10 +59,7 @@ struct UIList<MessageContent: View, InputView: View>: UIViewRepresentable {
         tableView.showsVerticalScrollIndicator = false
         tableView.estimatedSectionHeaderHeight = 1
         tableView.estimatedSectionFooterHeight = UITableView.automaticDimension
-        let backgroundImageView = UIImageView(image: UIImage(named: "bc_messanger")!)
-        backgroundImageView.contentMode = .scaleAspectFill
-        tableView.backgroundColor = .clear
-        tableView.backgroundView = backgroundImageView
+        tableView.backgroundColor = UIColor(theme.colors.mainBG)
         tableView.scrollsToTop = false
         tableView.isScrollEnabled = isScrollEnabled
 
@@ -369,7 +366,8 @@ struct UIList<MessageContent: View, InputView: View>: UIViewRepresentable {
             headerBuilder: headerBuilder, type: type, showDateHeaders: showDateHeaders,
             avatarSize: avatarSize, showMessageMenuOnLongPress: showMessageMenuOnLongPress,
             tapAvatarClosure: tapAvatarClosure, paginationHandler: paginationHandler,
-            messageStyler: messageStyler, showMessageTimeView: showMessageTimeView,
+            messageStyler: messageStyler,
+            showMessageTimeView: showMessageTimeView,
             messageLinkPreviewLimit: messageLinkPreviewLimit, messageFont: messageFont,
             sections: sections, ids: ids, mainBackgroundColor: theme.colors.mainBG,
             listSwipeActions: listSwipeActions)
@@ -417,7 +415,8 @@ struct UIList<MessageContent: View, InputView: View>: UIViewRepresentable {
             headerBuilder: ((Date) -> AnyView)?, type: ChatType, showDateHeaders: Bool,
             avatarSize: CGFloat, showMessageMenuOnLongPress: Bool,
             tapAvatarClosure: ChatView.TapAvatarClosure?, paginationHandler: PaginationHandler?,
-            messageStyler: @escaping (String) -> AttributedString, showMessageTimeView: Bool,
+            messageStyler: @escaping (String) -> AttributedString,
+            showMessageTimeView: Bool,
             messageLinkPreviewLimit: Int, messageFont: UIFont, sections: [MessagesSection],
             ids: [String], mainBackgroundColor: Color, paginationTargetIndexPath: IndexPath? = nil,
             listSwipeActions: ListSwipeActions
@@ -495,7 +494,7 @@ struct UIList<MessageContent: View, InputView: View>: UIViewRepresentable {
                 sectionHeaderViewBuilder(section)
                     .rotationEffect(Angle(degrees: (type == .conversation ? 180 : 0)))
             ).view
-            header?.backgroundColor = .clear//UIColor(chatTheme.colors.mainBackground)
+            header?.backgroundColor = UIColor(mainBackgroundColor)
             return header
         }
         
@@ -561,19 +560,29 @@ struct UIList<MessageContent: View, InputView: View>: UIViewRepresentable {
 
             let tableViewCell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
             tableViewCell.selectionStyle = .none
-            tableViewCell.backgroundColor = UIColor.clear
+            tableViewCell.backgroundColor = UIColor(mainBackgroundColor)
 
             let row = sections[indexPath.section].rows[indexPath.row]
             tableViewCell.contentConfiguration = UIHostingConfiguration {
-                ChatMessageView(viewModel: viewModel, messageBuilder: messageBuilder, row: row, chatType: type, avatarSize: avatarSize, tapAvatarClosure: tapAvatarClosure, messageUseMarkdown: messageUseMarkdown, isDisplayingMessageMenu: false, showMessageTimeView: showMessageTimeView, messageFont: messageFont)
-                    .transition(.scale)
-                    .background(MessageMenuPreferenceViewSetter(id: row.id))//here
-                    .rotationEffect(Angle(degrees: (type == .conversation ? 180 : 0)))
-                    .onTapGesture { }
-                    .applyIf(showMessageMenuOnLongPress) {
-                        $0.onLongPressGesture {
-                            self.viewModel.messageMenuRow = row
-                        }
+                ChatMessageView(
+                    viewModel: viewModel, messageBuilder: messageBuilder, row: row, chatType: type,
+                    avatarSize: avatarSize, tapAvatarClosure: tapAvatarClosure,
+                    messageStyler: messageStyler,
+                    isDisplayingMessageMenu: false, showMessageTimeView: showMessageTimeView,
+                    messageLinkPreviewLimit: messageLinkPreviewLimit, messageFont: messageFont
+                )
+                .transition(.scale)
+                .background(MessageMenuPreferenceViewSetter(id: row.id))
+                .rotationEffect(Angle(degrees: (type == .conversation ? 180 : 0)))
+                .applyIf(showMessageMenuOnLongPress) {
+                    $0.simultaneousGesture(
+                        TapGesture().onEnded { } // add empty tap to prevent iOS17 scroll breaking bug (drag on cells stops working)
+                    )
+                    .onLongPressGesture {
+                        // Trigger haptic feedback
+                        self.impactGenerator.impactOccurred()
+                        // Launch the message menu
+                        self.viewModel.messageMenuRow = row
                     }
                 }
             }

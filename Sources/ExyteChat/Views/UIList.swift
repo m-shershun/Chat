@@ -562,7 +562,6 @@ struct UIList<MessageContent: View, InputView: View>: UIViewRepresentable {
         }
 
         func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-
             let tableViewCell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
             tableViewCell.selectionStyle = .none
             tableViewCell.backgroundColor = .clear

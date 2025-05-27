@@ -25,7 +25,7 @@ struct MessageTextView: View {
 
     var styledText: AttributedString {
         var result = text.styled(using: messageStyler)
-        result.foregroundColor = theme.colors.messageText(userType)
+        result.foregroundColor = Color(hex: "#222949")//theme.colors.messageText(userType)
 
         for (link, range) in result.runs[\.link] {
             if link != nil {
